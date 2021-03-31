@@ -1,11 +1,11 @@
-# NIBEUplink Python Plugin
+# Siemens Python Plugin
 #
 # Author: flopp999
 #
 """
-<plugin key="NIBEUplink" name="NIBE Uplink 0.72" author="flopp999" version="0.72" wikilink="https://github.com/flopp999/NIBEUplink-Domoticz" externallink="https://www.nibeuplink.com/">
+<plugin key="Siemens" name="Siemens 0.1" author="flopp999" version="0.1" wikilink="https://github.com/flopp999/" externallink="https://www.ink.com/">
     <description>
-        <h2>NIBE Uplink is used to read data from api.nibeuplink.com</h2><br/>
+        <h2>Siemens is used to read data from api.siemens.com</h2><br/>
         <h2>Support me with a coffee &<a href="https://www.buymeacoffee.com/flopp999">https://www.buymeacoffee.com/flopp999</a></h2><br/>
         <h3>Features</h3>
         <ul style="list-style-type:square">
@@ -13,34 +13,22 @@
         </ul>
         <h3>Devices</h3>
         <ul style="list-style-type:square">
-            <li>Unit 0x is AUX_IN_OUT</li>
-            <li>Unit 1x is STATUS</li>
-            <li>Unit 2x is CPR_INFO_EP14</li>
-            <li>Unit 3x is VENTILATION</li>
-            <li>Unit 4x is SYSTEM_1</li>
-            <li>Unit 5x is ADDITION</li>
-            <li>Unit 6x is SMART_PRICE_ADAPTION</li>
-            <li>Unit 7x is SYSTEM_INFO</li>
-            <li>Unit 8x is SYSTEM_2</li>
-            <li>Unit 9x is HEAT_METER</li>
-            <li>Unit 1xx is ACTIVE_COOLING_2_PIPE</li>
+            <li>xxxxxxxxxxxxxxxxx</li>
         </ul>
         <h3>How to get your Identifier, Secret and URL?</h3>
-        <h4>&<a href="https://github.com/flopp999/NIBEUplink-Domoticz#identifier-secret-and-callback-url">https://github.com/flopp999/NIBEUplink-Domoticz#identifier-secret-and-callback-url</a></h4>
+        <h4>&<a href="https://github.com/flopp999/link-Domoticz#identifier-secret-and-callback-url">https://github.com/flopp999/NIBEUplink-Domoticz#identifier-secret-and-callback-url</a></h4>
         <h3>How to get your Access Code?</h3>
-        <h4>&<a href="https://github.com/flopp999/NIBEUplink-Domoticz#access-code">https://github.com/flopp999/NIBEUplink-Domoticz#access-code</a></h4>
+        <h4>&<a href="https://github.com/flopp999/link-Domoticz#access-code">https://github.com/flopp999/NIBEUplink-Domoticz#access-code</a></h4>
         <h3>How to get your System ID?</h3>
-        <h4>&<a href="https://github.com/flopp999/NIBEUplink-Domoticz#system-id">https://github.com/flopp999/NIBEUplink-Domoticz#system-id</a></h4>
+        <h4>&<a href="https://github.com/flopp999/link-Domoticz#system-id">https://github.com/flopp999/NIBEUplink-Domoticz#system-id</a></h4>
         <h3>Configuration</h3>
     </description>
     <params>
-        <param field="Username" label="NIBE Uplink Identifier" width="320px" required="true" default="Identifier"/>
-        <param field="Mode2" label="NIBE Uplink Secret" width="350px" required="true" default="Secret"/>
-        <param field="Address" label="NIBE Callback URL" width="950px" required="true" default="URL"/>
-        <param field="Mode1" label="NIBE Access Code" width="350px" required="true" default="Access Code"/>
-        <param field="Mode4" label="NIBE System ID" width="140px" required="true" default="ID"/>
-        <param field="Mode3" label="NIBE Refresh Token" width="350px" default="Copy Refresh Token from Log to here" required="true"/>
-        <param field="Mode5" label="Electricity Company Charge" width="70px" default="0" required="true"/>
+        <param field="Username" label="Siemens Client ID" width="320px" required="true" default="Client ID"/>
+        <param field="Mode2" label="Siemens Client Secret" width="350px" required="true" default="Client Secret"/>
+        <param field="Address" label="Siemens Callback URL" width="950px" required="true" default="URL"/>
+        <param field="Mode1" label="Siemens Access Code" width="350px" required="true" default="Access Code"/>
+        <param field="Mode3" label="Siemens Refresh Token" width="350px" default="Copy Refresh Token from Log to here" required="true"/>
         <param field="Mode6" label="Debug to file (Nibe.log)" width="70px">
             <options>
                 <option label="Yes" value="Yes" />
@@ -52,7 +40,7 @@
 """
 
 import Domoticz
-
+import siemens
 Package = True
 
 try:
@@ -71,9 +59,9 @@ except ImportError as e:
     Package = False
 
 dir = os.path.dirname(os.path.realpath(__file__))
-logger = logging.getLogger("NIBE")
+logger = logging.getLogger("Siemens")
 logger.setLevel(logging.INFO)
-handler = RotatingFileHandler(dir+'/NIBEUplink.log', maxBytes=50000, backupCount=5)
+handler = RotatingFileHandler(dir+'/Siemens.log', maxBytes=50000, backupCount=5)
 logger.addHandler(handler)
 
 class BasePlugin:
@@ -97,122 +85,88 @@ class BasePlugin:
         self.AllSettings = True
         self.Categories = []
 
-        if len(self.Ident) < 32:
-            Domoticz.Log("Identifier too short")
-            WriteDebug("Identifier too short")
-            self.Ident = CheckFile("Ident")
-        else:
-            WriteFile("Ident",self.Ident)
+#        if len(self.Ident) < 32:
+#            Domoticz.Log("Identifier too short")
+#            WriteDebug("Identifier too short")
+#            self.Ident = CheckFile("Ident")
+#        else:
+#            WriteFile("Ident",self.Ident)
 
-        if len(self.URL) < 26:
-            Domoticz.Log("URL too short")
-            WriteDebug("URL too short")
-            self.URL = CheckFile("URL")
-        else:
-            WriteFile("URL",self.URL)
+#        if len(self.URL) < 26:
+#            Domoticz.Log("URL too short")
+#            WriteDebug("URL too short")
+#            self.URL = CheckFile("URL")
+#        else:
+#            WriteFile("URL",self.URL)
 
-        if len(self.Access) < 370:
-            Domoticz.Log("Access Code too short")
-            WriteDebug("Access Code too short")
-            self.Access = CheckFile("Access")
-        else:
-            WriteFile("Access",self.Access)
+#        if len(self.Access) < 370:
+#            Domoticz.Log("Access Code too short")
+#            WriteDebug("Access Code too short")
+#            self.Access = CheckFile("Access")
+#        else:
+#            WriteFile("Access",self.Access)
 
-        if len(self.Secret) < 44:
-            Domoticz.Log("Secret too short")
-            WriteDebug("Secret too short")
-            self.Secret = CheckFile("Secret")
-        else:
-            WriteFile("Secret",self.Secret)
+#        if len(self.Secret) < 44:
+#            Domoticz.Log("Secret too short")
+#            WriteDebug("Secret too short")
+#            self.Secret = CheckFile("Secret")
+#        else:
+#            WriteFile("Secret",self.Secret)
 
-        if len(self.Refresh) < 270:
-            Domoticz.Log("Refresh too short")
-            WriteDebug("Refresh too short")
-        else:
-            WriteFile("Refresh",self.Refresh)
+#        if len(self.Refresh) < 270:
+#            Domoticz.Log("Refresh too short")
+#            WriteDebug("Refresh too short")
+#        else:
+#            WriteFile("Refresh",self.Refresh)
 
-        if len(self.SystemID) < 4:
-            Domoticz.Log("System ID too short")
-            WriteDebug("System ID too short")
-            self.SystemID = CheckFile("SystemID")
-        else:
-            WriteFile("SystemID",self.SystemID)
+#        if len(self.SystemID) < 4:
+#            Domoticz.Log("System ID too short")
+#            WriteDebug("System ID too short")
+#            self.SystemID = CheckFile("SystemID")
+#        else:
+#            WriteFile("SystemID",self.SystemID)
 
-        if 'NIBEUplink' not in Images:
-            Domoticz.Image('NIBEUplink.zip').Create()
+#        if 'NIBEUplink' not in Images:
+#            Domoticz.Image('NIBEUplink.zip').Create()
 
-        self.ImageID = Images["NIBEUplink"].ID
-
-        self.GetRefresh = Domoticz.Connection(Name="Get Refresh", Transport="TCP/IP", Protocol="HTTPS", Address="api.nibeuplink.com", Port="443")
-        if len(self.Refresh) < 50 and self.AllSettings == True:
-            self.GetRefresh.Connect()
-        self.GetToken = Domoticz.Connection(Name="Get Token", Transport="TCP/IP", Protocol="HTTPS", Address="api.nibeuplink.com", Port="443")
-        self.GetData = Domoticz.Connection(Name="Get Data", Transport="TCP/IP", Protocol="HTTPS", Address="api.nibeuplink.com", Port="443")
-        self.GetCategories = Domoticz.Connection(Name="Get Categories", Transport="TCP/IP", Protocol="HTTPS", Address="api.nibeuplink.com", Port="443")
+#        self.ImageID = Images["NIBEUplink"].ID
+        v = siemens.gettoken(self.Ident,self.Secret,self.Access,self.URL)
+        Domoticz.Log(str(v))
+        self.GetToken = Domoticz.Connection(Name="Get Token", Transport="TCP/IP", Protocol="HTTPS", Address="api.home-connect.com", Port="443")
+        self.GetToken.Connect()
 
     def onConnect(self, Connection, Status, Description):
-        if CheckInternet() == True and self.AllSettings == True:
+        if CheckInternet() == True:
+#        if CheckInternet() == True and self.AllSettings == True:
             if (Status == 0):
-                if Connection.Name == ("Get Refresh"):
-                    WriteDebug("Get Refresh")
-                    data = "grant_type=authorization_code"
-                    data += "&client_id="+self.Ident
-                    data += "&client_secret="+self.Secret
-                    data += "&code="+self.Access
-                    data += "&redirect_uri="+self.URL
-                    data += "&scope=READSYSTEM"
-                    headers = { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8', 'Host': 'api.nibeuplink.com', 'Authorization': ''}
-                    Connection.Send({'Verb':'POST', 'URL': '/oauth/token', 'Headers': headers, 'Data': data})
-
                 if Connection.Name == ("Get Token"):
+                    Domoticz.Log("token")
                     WriteDebug("Get Token")
-                    if len(self.Refresh) > 50:
-                        self.reftoken = self.Refresh
-                    data = "grant_type=refresh_token"
-                    data += "&client_id="+self.Ident
-                    data += "&client_secret="+self.Secret
-                    data += "&refresh_token="+self.reftoken
-                    headers = { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8', 'Host': 'api.nibeuplink.com', 'Authorization': ''}
+#                    if len(self.Refresh) > 50:
+#                        self.reftoken = self.Refresh
+#                    data = "grant_type=authorization_code"
+#                    data += "&client_id="+self.Ident
+#                    data += "&client_secret="+self.Secret
+#                    data += "&code="+self.Access
+#                    data += "&redirect_uri="+self.URL
+                    data="grant_type=authorization_code&client_id=1B2349B9FA66DC4F2B0561673667D40E5E03267E0F015E40CF4B15C33F871BB6&client_secret=6E218B9A3E676A3B8EEBF0D20439225E9164D39B5D505CE15AE3A5E5F9D2B8C1&code=eyJ4LXJlZyI6IkVVIiwieC1lbnYiOiJQUkQiLCJ0b2tlbiI6ImE3OGM2NTFiLTE3YzUtNDZjOS05ZmY2LWU4ZGQ3MjQ0NDE2YyIsImNsdHkiOiJwcml2YXRlIn0=&redirect_uri=https://test.se"
+#                    headers="a"
+#          headers = { 'Content-Type': 'application/x-www-form-urlencoded', 'Host': 'api.home-connect.com', 'Authorization':''}
+                    Domoticz.Log(str(data))
+#                    Domoticz.Log(str(headers))
                     WriteDebug("innan token send")
-                    Connection.Send({'Verb':'POST', 'URL': '/oauth/token', 'Headers': headers, 'Data': data})
+#                    Connection.Send({'Verb': 'POST','URL': 'api.home-connect.com/security/oauth/token', 'Headers': headers, 'Data': data, 'Host': 'api.home-connect.com'})
+                    Connection.Send({'Verb': 'POST','URL': 'http://api.home-connect.com/security/oauth/token', 'Data': data})
 
-                if Connection.Name == ("Get Data"):
-                    WriteDebug("Get Data")
-                    if self.Categories == []:
-                        self.GetCategories.Connect()
-                    self.loop = 0
-                    for category in ["AUX_IN_OUT", "STATUS", "CPR_INFO_EP14", "VENTILATION", "SYSTEM_1", "ADDITION", "SMART_PRICE_ADAPTION", "SYSTEM_INFO", "SYSTEM_2", "HEAT_METER", "ACTIVE_COOLING_2_PIPE"]:
-#                    for category in self.Categories:
-                        headers = { 'Host': 'api.nibeuplink.com', 'Authorization': 'Bearer '+self.token}
-                        WriteDebug("innan data send")
-                        Connection.Send({'Verb':'GET', 'URL': '/api/v1/systems/'+self.SystemID+'/serviceinfo/categories/'+category, 'Headers': headers})
-
-                if Connection.Name == ("Get Categories"):
-                        WriteDebug("Get Categories")
-                        headers = { 'Host': 'api.nibeuplink.com', 'Authorization': 'Bearer '+self.token}
-                        Connection.Send({'Verb':'GET', 'URL': '/api/v1/systems/'+self.SystemID+'/serviceinfo/categories/', 'Headers': headers})
 
     def onMessage(self, Connection, Data):
+        Domoticz.Log(str(Data))
         Status = int(Data["Status"])
         Data = Data['Data'].decode('UTF-8')
         WriteDebug("Status = "+str(Status))
-        Data = json.loads(Data)
+#        Data = json.loads(Data)
 
         if (Status == 200):
-
-            if Connection.Name == ("Get Refresh"):
-                self.reftoken = Data["refresh_token"]
-                if len(self.Refresh) < 50:
-                    Domoticz.Log("Copy token to Setup->Hardware->NibeUplink->Refresh Token:")
-                    Domoticz.Log(str(self.reftoken))
-                self.GetRefresh.Disconnect()
-                self.GetToken.Connect()
-
-            if Connection.Name == ("Get Categories"):
-                for each in Data:
-                    self.Categories.append(each["categoryId"])
-                Domoticz.Log(str(self.Categories))
-                self.GetCategories.Disconnect()
 
             if Connection.Name == ("Get Token"):
                 self.token = Data["access_token"]
@@ -222,77 +176,19 @@ class BasePlugin:
                 with open(dir+'/NIBEUplink.ini', 'w') as outfile:
                     json.dump(data, outfile, indent=4)
                 self.GetToken.Disconnect()
-                self.GetData.Connect()
+#                self.GetData.Connect()
 
-            if Connection.Name == ("Get Data"):
-                if self.loop == 6:
-                    SPAIDS=[]
-                    for ID in Data:
-                        SPAIDS.append(ID["parameterId"])
-                    if 10069 not in SPAIDS:
-                        UpdateDevice(int(64), int(0), str(0), "", "price of electricity", "10069", "")
-                    if 44908 not in SPAIDS:
-                        UpdateDevice(int(63), int(0), str(0), "", "smart price adaption status", "44908", "")
-                    if 44896 not in SPAIDS:
-                        UpdateDevice(int(61), int(0), str(0), "", "comfort mode heating", "44896", "")
-                    if 44897 not in SPAIDS:
-                        UpdateDevice(int(62), int(0), str(0), "", "comfort mode hot water", "44897", "")
-                loop2 = 0
-                for each in Data:
-                    loop2 += 1
-                    Unit = str(self.loop)+str(loop2)
-                    sValue = each["rawValue"]
-                    nValue = 0
-                    if each["unit"] == "°C" and sValue != -32768:
-                        sValue = sValue / 10.0
-                    if each["unit"] == "kWh" and sValue != -32768:
-                        sValue = sValue / 10.0
-                    if each["unit"] == "DM" and sValue != -32768:
-                        sValue = sValue / 10.0
-                    if each["unit"] == "l/m" and sValue != -32768:
-                        sValue = sValue / 10.0
-                    if each["unit"] == "A" and each["title"] != "fuse size":
-                        sValue = sValue / 10.0
-                    if each["title"] == "set max electrical add.":
-                        sValue = sValue / 100.0
-                    if each["unit"] == "öre/kWh":
-                        sValue = (((sValue / 1000.0) + float(Parameters["Mode5"])) * 1.25)
-                    if each["title"] == "time factor":
-                        sValue = (sValue / 10.0)
-                        each["title"] = "electrical time factor"
-                    if each["title"] == "electrical addition power":
-                        sValue = (sValue / 100.0)
-                    if each["parameterId"] == 44896:
-                        sValue = (sValue / 10.0)
-                    if each["parameterId"] == 40121:
-                        sValue = (sValue / 10.0)
-                    if int(Unit) > 70 and int(Unit) < 80:
-                        sValue = each["displayValue"]
-
-                    UpdateDevice(int(Unit), int(nValue), str(sValue), each["unit"], each["title"], each["parameterId"], each["designation"])
-                self.loop += 1
-                if self.loop == 11:
-                    Domoticz.Log("Updated")
-                    self.GetData.Disconnect()
 
         else:
             Domoticz.Error(str("Status "+str(Status)))
             Domoticz.Error(str(Data))
-            if _plugin.GetRefresh.Connected():
-                _plugin.GetRefresh.Disconnect()
             if _plugin.GetToken.Connected():
                 _plugin.GetToken.Disconnect()
-            if _plugin.GetData.Connected():
-                _plugin.GetData.Disconnect()
 
 
 
     def onHeartbeat(self):
-        self.Count += 1
-        if self.Count == 6 and not self.GetToken.Connected() and not self.GetToken.Connecting():
-            self.GetToken.Connect()
-            WriteDebug("onHeartbeat")
-            self.Count = 0
+        Domoticz.Log("h")
 
 global _plugin
 _plugin = BasePlugin()
