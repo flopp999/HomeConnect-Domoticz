@@ -26,8 +26,8 @@
     <params>
         <param field="Username" label="Siemens Client ID" width="320px" required="true" default="Client ID"/>
         <param field="Mode2" label="Siemens Client Secret" width="350px" required="true" default="Client Secret"/>
-        <param field="Address" label="Siemens Callback URL" width="950px" required="true" default="URL"/>
-        <param field="Mode1" label="Siemens Access Code" width="350px" required="true" default="Access Code"/>
+        <param field="Address" label="Siemens Redirect URI" width="950px" required="true" default="Redirect URI"/>
+        <param field="Mode1" label="Siemens Authorization Code" width="350px" required="true" default="Authorization Code"/>
         <param field="Mode3" label="Siemens Refresh Token" width="350px" default="Copy Refresh Token from Log to here" required="true"/>
         <param field="Mode6" label="Debug to file (Nibe.log)" width="70px">
             <options>
@@ -40,7 +40,7 @@
 """
 
 import Domoticz
-import siemens
+
 Package = True
 
 try:
@@ -68,23 +68,20 @@ class BasePlugin:
     enabled = False
 
     def __init__(self):
-        self.token = ''
+        self.AccessToken = ''
         self.loop = 0
         self.Count = 5
         return
 
     def onStart(self):
         WriteDebug("onStart")
-        self.Ident = Parameters["Username"]
-        self.URL = Parameters["Address"]
-        self.Access = Parameters["Mode1"]
-        self.Secret = Parameters["Mode2"]
-        self.Refresh = Parameters["Mode3"]
-        self.SystemID = Parameters["Mode4"]
-        self.Charge = Parameters["Mode5"]
-        self.AllSettings = True
-        self.Categories = []
-
+        self.ClientID = Parameters["Username"]
+        self.RedirectURI = Parameters["Address"]
+        self.AuthorizationCode = Parameters["Mode1"]
+        self.ClientSecret = Parameters["Mode2"]
+        self.RefreshToken = Parameters["Mode3"]
+        self.Status = ""
+        self.GetData = True
 #        if len(self.Ident) < 32:
 #            Domoticz.Log("Identifier too short")
 #            WriteDebug("Identifier too short")
@@ -113,9 +110,10 @@ class BasePlugin:
 #        else:
 #            WriteFile("Secret",self.Secret)
 
-#        if len(self.Refresh) < 270:
-#            Domoticz.Log("Refresh too short")
-#            WriteDebug("Refresh too short")
+        if len(self.RefreshToken) < 125:
+            Domoticz.Log("Refresh too short")
+            WriteDebug("Refresh too short")
+            self.RefreshToken = ""
 #        else:
 #            WriteFile("Refresh",self.Refresh)
 
@@ -130,65 +128,72 @@ class BasePlugin:
 #            Domoticz.Image('NIBEUplink.zip').Create()
 
 #        self.ImageID = Images["NIBEUplink"].ID
-        v = siemens.gettoken(self.Ident,self.Secret,self.Access,self.URL)
-        Domoticz.Log(str(v))
-        self.GetToken = Domoticz.Connection(Name="Get Token", Transport="TCP/IP", Protocol="HTTPS", Address="api.home-connect.com", Port="443")
-        self.GetToken.Connect()
+#        self.GetToken = Domoticz.Connection(Name="Get Token", Transport="TCP/IP", Protocol="HTTPS", Address="api.home-connect.com", Port="443")
+#        self.GetToken.Connect()
+#        self.GetData = Domoticz.Connection(Name="Get Data", Transport="TCP/IP", Protocol="HTTPS", Address="api.home-connect.com", Port="443")
 
-    def onConnect(self, Connection, Status, Description):
-        if CheckInternet() == True:
-#        if CheckInternet() == True and self.AllSettings == True:
-            if (Status == 0):
-                if Connection.Name == ("Get Token"):
-                    Domoticz.Log("token")
-                    WriteDebug("Get Token")
-#                    if len(self.Refresh) > 50:
-#                        self.reftoken = self.Refresh
-#                    data = "grant_type=authorization_code"
-#                    data += "&client_id="+self.Ident
-#                    data += "&client_secret="+self.Secret
-#                    data += "&code="+self.Access
-#                    data += "&redirect_uri="+self.URL
-                    data="grant_type=authorization_code&client_id=1B2349B9FA66DC4F2B0561673667D40E5E03267E0F015E40CF4B15C33F871BB6&client_secret=6E218B9A3E676A3B8EEBF0D20439225E9164D39B5D505CE15AE3A5E5F9D2B8C1&code=eyJ4LXJlZyI6IkVVIiwieC1lbnYiOiJQUkQiLCJ0b2tlbiI6ImE3OGM2NTFiLTE3YzUtNDZjOS05ZmY2LWU4ZGQ3MjQ0NDE2YyIsImNsdHkiOiJwcml2YXRlIn0=&redirect_uri=https://test.se"
-#                    headers="a"
-#          headers = { 'Content-Type': 'application/x-www-form-urlencoded', 'Host': 'api.home-connect.com', 'Authorization':''}
-                    Domoticz.Log(str(data))
-#                    Domoticz.Log(str(headers))
-                    WriteDebug("innan token send")
-#                    Connection.Send({'Verb': 'POST','URL': 'api.home-connect.com/security/oauth/token', 'Headers': headers, 'Data': data, 'Host': 'api.home-connect.com'})
-                    Connection.Send({'Verb': 'POST','URL': 'http://api.home-connect.com/security/oauth/token', 'Data': data})
-
-
-    def onMessage(self, Connection, Data):
-        Domoticz.Log(str(Data))
-        Status = int(Data["Status"])
-        Data = Data['Data'].decode('UTF-8')
-        WriteDebug("Status = "+str(Status))
+#        Domoticz.Log(str(Data))
+#        Status = int(Data["Status"])
+#        Data = Data['Data'].decode('UTF-8')
+#        WriteDebug("Status = "+str(Status))
 #        Data = json.loads(Data)
 
-        if (Status == 200):
 
-            if Connection.Name == ("Get Token"):
-                self.token = Data["access_token"]
-                with open(dir+'/NIBEUplink.ini') as jsonfile:
-                    data = json.load(jsonfile)
-                data["Config"][0]["Access"] = Data["access_token"]
-                with open(dir+'/NIBEUplink.ini', 'w') as outfile:
-                    json.dump(data, outfile, indent=4)
-                self.GetToken.Disconnect()
+#        Tokens = GetTokens(self.ClientID,self.ClientSecret,self.AuthorizationCode,self.RedirectURI)
+#        self.Status = Tokens.status_code
+#        Data = Token.json()
+#        Data = json.loads(Tokens.content)
+#        Domoticz.Log(str(Data["error"]))
+        self.AccessToken = "eyJ4LWVudiI6IlBSRCIsImFsZyI6IlJTMjU2IiwieC1yZWciOiJFVSIsImtpZCI6IlMxIn0.eyJmZ3JwIjpbXSwiY2x0eSI6InByaXZhdGUiLCJzdWIiOiIwNTRiNTJlZC02Y2Y3LTRmMjgtOWI1Ni1jNjBkZDNmNThlMmUiLCJhdWQiOiIxQjIzNDlCOUZBNjZEQzRGMkIwNTYxNjczNjY3RDQwRTVFMDMyNjdFMEYwMTVFNDBDRjRCMTVDMzNGODcxQkI2IiwiYXpwIjoiMUIyMzQ5QjlGQTY2REM0RjJCMDU2MTY3MzY2N0Q0MEU1RTAzMjY3RTBGMDE1RTQwQ0Y0QjE1QzMzRjg3MUJCNiIsInNjb3BlIjpbIklkZW50aWZ5QXBwbGlhbmNlIiwiRGlzaHdhc2hlci1Nb25pdG9yIl0sImlzcyI6IkVVOlBSRDo0MiIsImV4cCI6MTYxNzM4ODg0MiwiaWF0IjoxNjE3MzAyNDQyLCJqdGkiOiIwOGNkNWQ3My0wYzAxLTQwOTMtOTMzYy05NjU5NmZiMGU3ZGMifQ.aE3fYdWmkkSz-Skn5XLOEpEM9OlX8TJz-_pgtIaWP8I0T8MuQmfy-e7un2KimEzNzG2JhroXn9LJW0DAkzpYYNZ7YQJejWrQqhCLOiMWpdjuPyXV4L3y1aL6nssNQkq5cYN3MLw5eo0-UZfeJB3EHS3XfSs2Fyc8g5BNco2108iv9eME8lazjisp9PBKVV2kaNinNHLySvxTxIRTwrUgx_3-q6XlWabTrpMiOKTev9VMlV3BJhu_-KaFKZEaTamoJIxP2tIKDIbdHiLed8KxXhAGhlrYxMA0iQirx1MKk8B3K1hcIOJ-aIWnG5N_g3Pay_Qaro9L14VG7q7dvGl4VQ"
+
+
+
+#        if (self.Status == 200):
+
+#            self.AccessToken = Data["access_token"]
+#            Domoticz.Log("first token"+str(self.token))
+#            Domoticz.Log("innan refresh"+str(self.refreshtoken))
+#            self.RefreshToken = Data["refresh_token"]
+#            Domoticz.Log("first refresh"+str(self.refreshtoken))
+
+#                with open(dir+'/NIBEUplink.ini') as jsonfile:
+#                    data = json.load(jsonfile)
+#                data["Config"][0]["Access"] = Data["access_token"]
+#                with open(dir+'/NIBEUplink.ini', 'w') as outfile:
+#                    json.dump(data, outfile, indent=4)
+#                self.GetToken.Disconnect()
 #                self.GetData.Connect()
 
 
-        else:
-            Domoticz.Error(str("Status "+str(Status)))
-            Domoticz.Error(str(Data))
-            if _plugin.GetToken.Connected():
-                _plugin.GetToken.Disconnect()
-
-
+#        else:
+#            Domoticz.Error(str("Status "+str(self.Status)))
+#            Domoticz.Error(str(Data))
+#            if _plugin.GetToken.Connected():
+#                _plugin.GetToken.Disconnect()
 
     def onHeartbeat(self):
-        Domoticz.Log("h")
+        WriteDebug("onHeartbeat")
+        HourNow = (datetime.now().hour)
+        MinuteNow = (datetime.now().minute)
+
+        self.Count += 1
+        if self.Count == 6 and _plugin.GetData == True:
+# and _plugin.Status == 200:
+            a = GetAppliances(_plugin.AccessToken)
+            self.Count = 0
+
+        if HourNow == 0 and MinuteNow == 0 and self.GetData is False:
+            _plugin.GetData = True
+#            if not _plugin.GetDataCurrent.Connected() and not _plugin.GetDataCurrent.Connecting():
+#                WriteDebug("onHeartbeatGetDataCurrent")
+#                _plugin.GetDataCurrent.Connect()
+#        Domoticz.Log(str(self.refreshtoken))
+
+#        GetData =
+#        if self.Status == 200:
+#            NewToken = getnewtoken(_plugin.refreshtoken,_plugin.Secret)
+#        Domoticz.Log(str(getappliance(self.Token)))
+
 
 global _plugin
 _plugin = BasePlugin()
@@ -198,12 +203,6 @@ def onStart():
     _plugin.onStart()
 
 def UpdateDevice(ID, nValue, sValue, Unit, Name, PID, Design):
-    if PID == 44896:
-        ID = 61
-    if PID == 44897:
-        ID = 62
-    if PID == 44908:
-        ID = 63
     if PID == 10069:
         ID = 64
     if (ID in Devices):
@@ -219,40 +218,63 @@ def UpdateDevice(ID, nValue, sValue, Unit, Name, PID, Design):
         elif Unit == "A":
             if ID == 15:
                 Domoticz.Device(Name=Name+" 1", Unit=ID, TypeName="Current (Single)", Used=1, Image=(_plugin.ImageID), Description="ParameterID="+str(PID)+"\nDesignation="+str(Design)).Create()
-            if ID == 16:
-                Domoticz.Device(Name=Name+" 2", Unit=ID, TypeName="Current (Single)", Used=1, Image=(_plugin.ImageID), Description="ParameterID="+str(PID)+"\nDesignation="+str(Design)).Create()
-            if ID == 17:
-                Domoticz.Device(Name=Name+" 3", Unit=ID, TypeName="Current (Single)", Used=1, Image=(_plugin.ImageID), Description="ParameterID="+str(PID)+"\nDesignation="+str(Design)).Create()
-            if ID == 53:
-                Domoticz.Device(Name=Name, Unit=ID, TypeName="Current (Single)", Used=1, Image=(_plugin.ImageID), Description="ParameterID="+str(PID)).Create()
-        elif Name == "compressor starts":
-            Domoticz.Device(Name=Name, Unit=ID, TypeName="Custom", Options={"Custom": "0;times"}, Used=1, Image=(_plugin.ImageID), Description="ParameterID="+str(PID)+"\nDesignation="+str(Design)).Create()
         elif Name == "blocked":
             if ID == 21:
                 Domoticz.Device(Name="compressor "+Name, Unit=ID, TypeName="Custom", Used=1, Image=(_plugin.ImageID), Description="ParameterID="+str(PID)).Create()
-            if ID == 51:
-                Domoticz.Device(Name="addition "+Name, Unit=ID, TypeName="Custom", Used=1, Image=(_plugin.ImageID), Description="ParameterID="+str(PID)).Create()
-        elif ID == 24:
-            Domoticz.Device(Name="compressor "+Name, Unit=ID, TypeName="Temperature", Used=1, Image=(_plugin.ImageID), Description="ParameterID="+str(PID)+"\nDesignation="+str(Design)).Create()
-        elif ID == 41 or ID == 81:
-            Domoticz.Device(Name=Name, Unit=ID, TypeName="Custom", Used=1, Image=(_plugin.ImageID), Description="ParameterID="+str(PID)+"\nDesignation="+str(Design)).Create()
-        elif ID == 61:
-            Domoticz.Device(Name="comfort mode "+Name, Unit=ID, TypeName="Custom", Used=1, Image=(_plugin.ImageID), Description="ParameterID="+str(PID)).Create()
-        elif ID == 62:
-            Domoticz.Device(Name="comfort mode "+Name, Unit=ID, TypeName="Custom", Used=1, Image=(_plugin.ImageID), Description="ParameterID="+str(PID)).Create()
-        elif ID == 63:
-            Domoticz.Device(Name="smart price adaption "+Name, Unit=ID, TypeName="Custom", Used=1, Image=(_plugin.ImageID), Description="ParameterID="+str(PID)).Create()
-        elif ID == 71:
-            Domoticz.Device(Name=Name, Unit=ID, TypeName="Text", Used=1, Image=(_plugin.ImageID), Description="ParameterID="+str(PID)).Create()
-        elif ID == 72 or ID == 73:
-            Domoticz.Device(Name=Name, Unit=ID, TypeName="Text", Used=1, Image=(_plugin.ImageID)).Create()
-        elif ID == 74:
-            Domoticz.Device(Name="software "+Name, Unit=ID, TypeName="Text", Used=1, Image=(_plugin.ImageID)).Create()
         else:
             if Design == "":
                 Domoticz.Device(Name=Name, Unit=ID, TypeName="Custom", Options={"Custom": "0;"+Unit}, Used=1, Image=(_plugin.ImageID), Description="ParameterID="+str(PID)).Create()
             else:
                 Domoticz.Device(Name=Name, Unit=ID, TypeName="Custom", Options={"Custom": "0;"+Unit}, Used=1, Image=(_plugin.ImageID), Description="ParameterID="+str(PID)+"\nDesignation="+str(Design)).Create()
+
+def GetAppliances(Token):
+
+    headers = { "Authorization": "Bearer "+Token }
+    Appliances = requests.get("https://api.home-connect.com/api/homeappliances", headers=headers)
+    _plugin.Status = Appliances.status_code
+    Appliances = Appliances.json()
+    if Appliances["error"]:
+        _plugin.Status = int(Appliances["error"]["key"])
+        CheckStatus(_plugin.Status, Appliances)
+    else:
+        for each in Appliances:
+            Domoticz.Log(str(each))
+#        name = each["name"]
+#        brand = each["brand"]
+#        vib = each["vib"]
+#        connected = each["connected"]
+#        type = each["type"]
+#        enumber = each["enumber"]
+#        haId = each["haId"]
+#        UpdateDevice(int(Unit), int(nValue), str(sValue), each["unit"], each["title"], each["parameterId"], each["designation"])
+
+
+#    return Token
+
+def GetTokens(ClientID, ClientSecret, Code, URL):
+
+    data={"grant_type":"authorization_code","client_id":ClientID,"client_secret":ClientSecret,"code":Code,"redirect_uri":URL}
+    headers = { 'Content-Type': 'application/x-www-form-urlencoded'}
+    Tokens=requests.post("https://api.home-connect.com/security/oauth/token", data=data, headers=headers)
+#    Domoticz.Log("Message="+str(Token.json()))
+#    Domoticz.Log("Status="+str(Token.status_code))
+
+    return Tokens
+
+def GetNewAccessCode(RefreshToken, ClientSecret):
+
+    data={"grant_type":"refresh_token","refresh_token":RefreshToken,"client_secret":ClientSecret}
+    headers = { 'Content-Type': 'application/x-www-form-urlencoded'}
+    NewAccessCode=requests.post("https://api.home-connect.com/security/oauth/token", data=data, headers=headers)
+#    Domoticz.Log("Message="+str(NewToken.json()))
+#    Domoticz.Log("Status="+str(NewToken.status_code))
+    Data = json.loads(NewAccessCode.content)
+    _plugin.AccessToken = Data["access_token"]
+    _plugin.RefreshToken = Data["refresh_token"]
+#    Domoticz.Log("ny token"+str(_plugin.token))
+    Domoticz.Log("ny refresh "+str(_plugin.RefreshToken))
+
+    return NewAcessCode
 
 def CreateFile():
     if not os.path.isfile(dir+'/NIBEUplink.ini'):
@@ -269,6 +291,13 @@ def CreateFile():
              })
         with open(dir+'/NIBEUplink.ini', 'w') as outfile:
             json.dump(data, outfile, indent=4)
+
+def CheckStatus(Status, Data):
+
+    if Status == 429:
+        Domoticz.Error("Status = "+str(Status))
+        Domoticz.Error("Error: "+str(Data["error"]["description"]))
+        _plugin.GetData = False
 
 def CheckFile(Parameter):
     if os.path.isfile(dir+'/NIBEUplink.ini'):
