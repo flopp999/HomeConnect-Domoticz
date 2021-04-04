@@ -5,7 +5,7 @@
 """
 <plugin key="Home Connect" name="Home Connect 0.1" author="flopp999" version="0.1" wikilink="https://github.com/flopp999/" externallink="https://www.ink.com/">
     <description>
-        <h2>Siemens is used to read data from https://api.home-connect.com</h2><br/>
+        <h2>HomeConnect is reading data from https://api.home-connect.com</h2><br/>
         <h2>Support me with a coffee &<a href="https://www.buymeacoffee.com/flopp999">https://www.buymeacoffee.com/flopp999</a></h2><br/>
         <h3>Features</h3>
         <ul style="list-style-type:square">
@@ -15,12 +15,10 @@
         <ul style="list-style-type:square">
             <li>xxxxxxxxxxxxxxxxx</li>
         </ul>
-        <h3>How to get your Identifier, Secret and URL?</h3>
-        <h4>&<a href="https://github.com/flopp999/link-Domoticz#identifier-secret-and-callback-url">https://github.com/flopp999/NIBEUplink-Domoticz#identifier-secret-and-callback-url</a></h4>
-        <h3>How to get your Access Code?</h3>
-        <h4>&<a href="https://github.com/flopp999/link-Domoticz#access-code">https://github.com/flopp999/NIBEUplink-Domoticz#access-code</a></h4>
-        <h3>How to get your System ID?</h3>
-        <h4>&<a href="https://github.com/flopp999/link-Domoticz#system-id">https://github.com/flopp999/NIBEUplink-Domoticz#system-id</a></h4>
+        <h3>How to get your Cliend ID, Client Secret and  Redirect URI?</h3>
+        <h4>&<a href="https://github.com/flopp999/HomeConnect-Domoticz#identifier-secret-and-callback-url">https://github.com/flopp999/HomeConnect-Domoticz#identifier-secret-and-callback-url</a></h4>
+        <h3>How to get your Authorization Code?</h3>
+        <h4>&<a href="https://github.com/flopp999/HomeConnect-Domoticz#access-code">https://github.com/flopp999/HomeConnect-Domoticz#access-code</a></h4>
         <h3>Configuration</h3>
     </description>
     <params>
@@ -29,7 +27,7 @@
         <param field="Address" label="Home Connect Redirect URI" width="950px" required="true" default="Redirect URI"/>
         <param field="Mode1" label="Home Connect Authorization Code" width="350px" required="true" default="Authorization Code"/>
         <param field="Mode3" label="Home Connect Refresh Token" width="350px" default="Copy Refresh Token from Log to here" required="true"/>
-        <param field="Mode6" label="Debug to file (Nibe.log)" width="70px">
+        <param field="Mode6" label="Debug to file (HomeConnect.log)" width="70px">
             <options>
                 <option label="Yes" value="Yes" />
                 <option label="No" value="No" default="true" />
@@ -68,7 +66,7 @@ class BasePlugin:
     enabled = False
 
     def __init__(self):
-        self.AccessToken = ''
+        self.AccessToken = ""
         self.loop = 0
         self.Count = 5
         return
@@ -120,10 +118,10 @@ class BasePlugin:
 #        else:
 #            WriteFile("Refresh",self.Refresh)
 
-#        if 'HomeConnect' not in Images:
-#            Domoticz.Image('HomeConnect.zip').Create()
+        if 'HomeConnect' not in Images:
+            Domoticz.Image('HomeConnect.zip').Create()
 
-#        self.ImageID = Images["HomeConnect"].ID
+        self.ImageID = Images["HomeConnect"].ID
 #        self.GetToken = Domoticz.Connection(Name="Get Token", Transport="TCP/IP", Protocol="HTTPS", Address="api.home-connect.com", Port="443")
 #        self.GetToken.Connect()
 #        self.GetData = Domoticz.Connection(Name="Get Data", Transport="TCP/IP", Protocol="HTTPS", Address="api.home-connect.com", Port="443")
@@ -151,10 +149,10 @@ class BasePlugin:
 #            self.RefreshToken = Data["refresh_token"]
 #            Domoticz.Log("first refresh"+str(self.refreshtoken))
 
-#                with open(dir+'/NIBEUplink.ini') as jsonfile:
+#                with open(dir+'/HomeConnect.ini') as jsonfile:
 #                    data = json.load(jsonfile)
 #                data["Config"][0]["Access"] = Data["access_token"]
-#                with open(dir+'/NIBEUplink.ini', 'w') as outfile:
+#                with open(dir+'/HomeConnect.ini', 'w') as outfile:
 #                    json.dump(data, outfile, indent=4)
 #                self.GetToken.Disconnect()
 #                self.GetData.Connect()
@@ -205,9 +203,9 @@ def UpdateDevice(Unit, nValue, sValue, Name, Brand, VIB, Type, eNumber, haId):
         if sValue == "-32768":
             return
         elif Unit == 1:
-            Domoticz.Device(Name=Name+" Connected", Unit=Unit, TypeName="Text", Used=1, Description="Brand="+str(Brand)+"\ntype="+str(VIB)+"\neNumber="+str(eNumber)+"\nhaId="+str(haId)).Create()
+            Domoticz.Device(Name=Name+" Connected", Unit=Unit, TypeName="Custom", Used=1, Image=(_plugin.ImageID), Description="Brand="+str(Brand)+"\ntype="+str(VIB)+"\neNumber="+str(eNumber)+"\nhaId="+str(haId)).Create()
         elif Unit == 2:
-            Domoticz.Device(Name=Name+" State", Unit=Unit, TypeName="Text", Used=1).Create()
+            Domoticz.Device(Name=Name+" State", Unit=Unit, TypeName="Custom", Used=1, Image=(_plugin.ImageID)).Create()
 
 
 def GetAppliances(Token):
@@ -327,10 +325,10 @@ def CheckFile(Parameter):
 
 def WriteFile(Parameter,text):
     CreateFile()
-    with open(dir+'/NIBEUplink.ini') as jsonfile:
+    with open(dir+'/HomeConnect.ini') as jsonfile:
         data = json.load(jsonfile)
     data["Config"][0][Parameter] = text
-    with open(dir+'/NIBEUplink.ini', 'w') as outfile:
+    with open(dir+'/HomeConnect.ini', 'w') as outfile:
         json.dump(data, outfile, indent=4)
 
 def CheckInternet():
