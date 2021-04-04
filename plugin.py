@@ -1,11 +1,11 @@
-# Siemens Python Plugin
+# Home Connect Python Plugin
 #
 # Author: flopp999
 #
 """
-<plugin key="Siemens" name="Siemens 0.1" author="flopp999" version="0.1" wikilink="https://github.com/flopp999/" externallink="https://www.ink.com/">
+<plugin key="Home Connect" name="Home Connect 0.1" author="flopp999" version="0.1" wikilink="https://github.com/flopp999/" externallink="https://www.ink.com/">
     <description>
-        <h2>Siemens is used to read data from api.siemens.com</h2><br/>
+        <h2>Siemens is used to read data from https://api.home-connect.com</h2><br/>
         <h2>Support me with a coffee &<a href="https://www.buymeacoffee.com/flopp999">https://www.buymeacoffee.com/flopp999</a></h2><br/>
         <h3>Features</h3>
         <ul style="list-style-type:square">
@@ -59,9 +59,9 @@ except ImportError as e:
     Package = False
 
 dir = os.path.dirname(os.path.realpath(__file__))
-logger = logging.getLogger("Siemens")
+logger = logging.getLogger("HomeConnect")
 logger.setLevel(logging.INFO)
-handler = RotatingFileHandler(dir+'/Siemens.log', maxBytes=50000, backupCount=5)
+handler = RotatingFileHandler(dir+'/HomeConnect.log', maxBytes=50000, backupCount=5)
 logger.addHandler(handler)
 
 class BasePlugin:
@@ -82,6 +82,9 @@ class BasePlugin:
         self.RefreshToken = Parameters["Mode3"]
         self.Status = ""
         self.GetData = True
+        self.haId = ""
+        self.DevicesName = []
+        self.DeviceshaId = []
 #        if len(self.Ident) < 32:
 #            Domoticz.Log("Identifier too short")
 #            WriteDebug("Identifier too short")
@@ -144,7 +147,6 @@ class BasePlugin:
 #        Data = Token.json()
 #        Data = json.loads(Tokens.content)
 #        Domoticz.Log(str(Data["error"]))
-        self.AccessToken = "eyJ4LWVudiI6IlBSRCIsImFsZyI6IlJTMjU2IiwieC1yZWciOiJFVSIsImtpZCI6IlMxIn0.eyJmZ3JwIjpbXSwiY2x0eSI6InByaXZhdGUiLCJzdWIiOiIwNTRiNTJlZC02Y2Y3LTRmMjgtOWI1Ni1jNjBkZDNmNThlMmUiLCJhdWQiOiIxQjIzNDlCOUZBNjZEQzRGMkIwNTYxNjczNjY3RDQwRTVFMDMyNjdFMEYwMTVFNDBDRjRCMTVDMzNGODcxQkI2IiwiYXpwIjoiMUIyMzQ5QjlGQTY2REM0RjJCMDU2MTY3MzY2N0Q0MEU1RTAzMjY3RTBGMDE1RTQwQ0Y0QjE1QzMzRjg3MUJCNiIsInNjb3BlIjpbIklkZW50aWZ5QXBwbGlhbmNlIiwiRGlzaHdhc2hlci1Nb25pdG9yIl0sImlzcyI6IkVVOlBSRDo0MiIsImV4cCI6MTYxNzM4ODg0MiwiaWF0IjoxNjE3MzAyNDQyLCJqdGkiOiIwOGNkNWQ3My0wYzAxLTQwOTMtOTMzYy05NjU5NmZiMGU3ZGMifQ.aE3fYdWmkkSz-Skn5XLOEpEM9OlX8TJz-_pgtIaWP8I0T8MuQmfy-e7un2KimEzNzG2JhroXn9LJW0DAkzpYYNZ7YQJejWrQqhCLOiMWpdjuPyXV4L3y1aL6nssNQkq5cYN3MLw5eo0-UZfeJB3EHS3XfSs2Fyc8g5BNco2108iv9eME8lazjisp9PBKVV2kaNinNHLySvxTxIRTwrUgx_3-q6XlWabTrpMiOKTev9VMlV3BJhu_-KaFKZEaTamoJIxP2tIKDIbdHiLed8KxXhAGhlrYxMA0iQirx1MKk8B3K1hcIOJ-aIWnG5N_g3Pay_Qaro9L14VG7q7dvGl4VQ"
 
 
 
@@ -177,11 +179,11 @@ class BasePlugin:
         MinuteNow = (datetime.now().minute)
 
         self.Count += 1
-        if self.Count == 6 and _plugin.GetData == True:
+        if self.Count == 6 and _plugin.GetData == True:  # check every minute
 # and _plugin.Status == 200:
             a = GetAppliances(_plugin.AccessToken)
             self.Count = 0
-
+            GetOperationState(_plugin.AccessToken, _plugin.DeviceshaId, _plugin.DevicesName)
         if HourNow == 0 and MinuteNow == 0 and self.GetData is False:
             _plugin.GetData = True
 #            if not _plugin.GetDataCurrent.Connected() and not _plugin.GetDataCurrent.Connecting():
@@ -202,51 +204,45 @@ def onStart():
     global _plugin
     _plugin.onStart()
 
-def UpdateDevice(ID, nValue, sValue, Unit, Name, PID, Design):
-    if PID == 10069:
-        ID = 64
-    if (ID in Devices):
-        if (Devices[ID].nValue != nValue) or (Devices[ID].sValue != sValue):
-            Devices[ID].Update(nValue, str(sValue))
-    if (ID not in Devices):
+def UpdateDevice(Unit, nValue, sValue, Name, Brand, VIB, Type, eNumber, haId):
+    if (Unit in Devices):
+        if (Devices[Unit].nValue != nValue) or (Devices[Unit].sValue != sValue):
+            Devices[Unit].Update(nValue, str(sValue))
+    if (Unit not in Devices):
         if sValue == "-32768":
             return
-        elif Unit == "l/m":
-            Domoticz.Device(Name=Name, Unit=ID, TypeName="Waterflow", Used=1, Description="ParameterID="+str(PID)+"\nDesignation="+str(Design)).Create()
-        elif Unit == "°C" or ID == 56 and ID !=24:
-            Domoticz.Device(Name=Name, Unit=ID, TypeName="Temperature", Used=1, Image=(_plugin.ImageID), Description="ParameterID="+str(PID)+"\nDesignation="+str(Design)).Create()
-        elif Unit == "A":
-            if ID == 15:
-                Domoticz.Device(Name=Name+" 1", Unit=ID, TypeName="Current (Single)", Used=1, Image=(_plugin.ImageID), Description="ParameterID="+str(PID)+"\nDesignation="+str(Design)).Create()
-        elif Name == "blocked":
-            if ID == 21:
-                Domoticz.Device(Name="compressor "+Name, Unit=ID, TypeName="Custom", Used=1, Image=(_plugin.ImageID), Description="ParameterID="+str(PID)).Create()
-        else:
-            if Design == "":
-                Domoticz.Device(Name=Name, Unit=ID, TypeName="Custom", Options={"Custom": "0;"+Unit}, Used=1, Image=(_plugin.ImageID), Description="ParameterID="+str(PID)).Create()
-            else:
-                Domoticz.Device(Name=Name, Unit=ID, TypeName="Custom", Options={"Custom": "0;"+Unit}, Used=1, Image=(_plugin.ImageID), Description="ParameterID="+str(PID)+"\nDesignation="+str(Design)).Create()
+        elif Unit == 1:
+            Domoticz.Device(Name=Name+" Connected", Unit=Unit, TypeName="Text", Used=1, Description="Brand="+str(Brand)+"\ntype="+str(VIB)+"\neNumber="+str(eNumber)+"\nhaId="+str(haId)).Create()
+        elif Unit == 2:
+            Domoticz.Device(Name=Name+" State", Unit=Unit, TypeName="Text", Used=1).Create()
+
 
 def GetAppliances(Token):
 
     headers = { "Authorization": "Bearer "+Token }
     Appliances = requests.get("https://api.home-connect.com/api/homeappliances", headers=headers)
-    _plugin.Status = Appliances.status_code
+    Domoticz.Log(str(Appliances.content))
+    Domoticz.Log(str(Appliances.status_code))
+
+    _plugin.Status = int(Appliances.status_code)
     Appliances = Appliances.json()
-    if Appliances["error"]:
-        _plugin.Status = int(Appliances["error"]["key"])
+    if _plugin.Status != 200:
+        _plugin.Status = Appliances["error"]["key"]
         CheckStatus(_plugin.Status, Appliances)
     else:
-        for each in Appliances:
+        for each in Appliances["data"]["homeappliances"]:
             Domoticz.Log(str(each))
-#        name = each["name"]
-#        brand = each["brand"]
-#        vib = each["vib"]
-#        connected = each["connected"]
-#        type = each["type"]
-#        enumber = each["enumber"]
-#        haId = each["haId"]
-#        UpdateDevice(int(Unit), int(nValue), str(sValue), each["unit"], each["title"], each["parameterId"], each["designation"])
+        name = each["name"]
+        brand = each["brand"]
+        vib = each["vib"]
+        connected = each["connected"]
+        type = each["type"]
+        enumber = each["enumber"]
+        haId = each["haId"]
+        Domoticz.Log(str(name))
+        UpdateDevice(1, 0, connected, name, brand, vib, type, enumber, haId)
+        _plugin.DevicesName.append(name)
+        _plugin.DeviceshaId.append(haId)
 
 
 #    return Token
@@ -260,6 +256,33 @@ def GetTokens(ClientID, ClientSecret, Code, URL):
 #    Domoticz.Log("Status="+str(Token.status_code))
 
     return Tokens
+
+def GetOperationState(Token, haIds, Names):
+    Domoticz.Log(str(Token))
+    Domoticz.Log(str(haIds))
+    Domoticz.Log(str(Names))
+
+#    data={"grant_type":"authorization_code","client_id":ClientID,"client_secret":ClientSecret,"code":Code,"redirect_uri":URL}
+    headers = { "Authorization": "Bearer "+Token }
+    for Name, haId in zip(Names, haIds):
+        OperationState=requests.get("https://api.home-connect.com/api/homeappliances/"+haId+"/status/BSH.Common.Status.OperationState", headers=headers)
+        Domoticz.Log(str(OperationState.status_code))
+        Domoticz.Log(str(OperationState.json()))
+        OperationState = OperationState.json()
+        OperationState = OperationState["data"]["value"]
+        OperationState = OperationState.split(".")
+        OperationState = OperationState[-1]
+        UpdateDevice(2, 0, OperationState, Name, 0, 0, 0, 0, 0)
+        Domoticz.Log(str(OperationState))
+
+
+
+#####           curl -X GET "https://simulator.home-connect.com/api/homeappliances/010090386487001856/status/OperationState" -H "accept: application/vnd.bsh.sdk.v1+json" -H "Accept-Language: en-GB"
+
+#    Domoticz.Log("Message="+str(Token.json()))
+#    Domoticz.Log("Status="+str(Token.status_code))
+
+#    return Tokens
 
 def GetNewAccessCode(RefreshToken, ClientSecret):
 
@@ -277,7 +300,7 @@ def GetNewAccessCode(RefreshToken, ClientSecret):
     return NewAcessCode
 
 def CreateFile():
-    if not os.path.isfile(dir+'/NIBEUplink.ini'):
+    if not os.path.isfile(dir+'/HomeConnect.ini'):
         data = {}
         data["Config"] = []
         data["Config"].append({
@@ -289,19 +312,19 @@ def CreateFile():
              "SystemID": "",
              "URL": ""
              })
-        with open(dir+'/NIBEUplink.ini', 'w') as outfile:
+        with open(dir+'/HomeConnect.ini', 'w') as outfile:
             json.dump(data, outfile, indent=4)
 
 def CheckStatus(Status, Data):
 
-    if Status == 429:
+    if Status != "200":
         Domoticz.Error("Status = "+str(Status))
         Domoticz.Error("Error: "+str(Data["error"]["description"]))
         _plugin.GetData = False
 
 def CheckFile(Parameter):
-    if os.path.isfile(dir+'/NIBEUplink.ini'):
-        with open(dir+'/NIBEUplink.ini') as jsonfile:
+    if os.path.isfile(dir+'/HomeConnect.ini'):
+        with open(dir+'/HomeConnect.ini') as jsonfile:
             data = json.load(jsonfile)
             data = data["Config"][0][Parameter]
             if data == "":
@@ -321,7 +344,7 @@ def CheckInternet():
     WriteDebug("Entered CheckInternet")
     try:
         WriteDebug("Ping")
-        requests.get(url='https://api.nibeuplink.com/', timeout=2)
+        requests.get(url='https://api.home-connect.com/', timeout=2)
         WriteDebug("Internet is OK")
         return True
     except:
