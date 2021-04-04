@@ -24,11 +24,11 @@
         <h3>Configuration</h3>
     </description>
     <params>
-        <param field="Username" label="Siemens Client ID" width="320px" required="true" default="Client ID"/>
-        <param field="Mode2" label="Siemens Client Secret" width="350px" required="true" default="Client Secret"/>
-        <param field="Address" label="Siemens Redirect URI" width="950px" required="true" default="Redirect URI"/>
-        <param field="Mode1" label="Siemens Authorization Code" width="350px" required="true" default="Authorization Code"/>
-        <param field="Mode3" label="Siemens Refresh Token" width="350px" default="Copy Refresh Token from Log to here" required="true"/>
+        <param field="Username" label="Home Connect Client ID" width="320px" required="true" default="Client ID"/>
+        <param field="Mode2" label="Home Connect Client Secret" width="350px" required="true" default="Client Secret"/>
+        <param field="Address" label="Home Connect Redirect URI" width="950px" required="true" default="Redirect URI"/>
+        <param field="Mode1" label="Home Connect Authorization Code" width="350px" required="true" default="Authorization Code"/>
+        <param field="Mode3" label="Home Connect Refresh Token" width="350px" default="Copy Refresh Token from Log to here" required="true"/>
         <param field="Mode6" label="Debug to file (Nibe.log)" width="70px">
             <options>
                 <option label="Yes" value="Yes" />
@@ -85,52 +85,45 @@ class BasePlugin:
         self.haId = ""
         self.DevicesName = []
         self.DeviceshaId = []
-#        if len(self.Ident) < 32:
-#            Domoticz.Log("Identifier too short")
-#            WriteDebug("Identifier too short")
+        if len(self.ClientID) < 64:
+            Domoticz.Log("Client ID too short")
+            WriteDebug("Client ID too short")
 #            self.Ident = CheckFile("Ident")
 #        else:
 #            WriteFile("Ident",self.Ident)
 
-#        if len(self.URL) < 26:
-#            Domoticz.Log("URL too short")
-#            WriteDebug("URL too short")
+        if len(self.RedirectURI) < 8:
+            Domoticz.Log("Redirect URI too short")
+            WriteDebug("Redirect URI too short")
 #            self.URL = CheckFile("URL")
 #        else:
 #            WriteFile("URL",self.URL)
 
-#        if len(self.Access) < 370:
-#            Domoticz.Log("Access Code too short")
-#            WriteDebug("Access Code too short")
+        if len(self.AuthorizationCode) < 124:
+            Domoticz.Log("Authorization Code too short")
+            WriteDebug("Authorization Code too short")
 #            self.Access = CheckFile("Access")
 #        else:
 #            WriteFile("Access",self.Access)
 
-#        if len(self.Secret) < 44:
-#            Domoticz.Log("Secret too short")
-#            WriteDebug("Secret too short")
+        if len(self.ClientSecret) < 64:
+            Domoticz.Log("Client Secret too short")
+            WriteDebug("Client Secret too short")
 #            self.Secret = CheckFile("Secret")
 #        else:
 #            WriteFile("Secret",self.Secret)
 
-        if len(self.RefreshToken) < 125:
+        if len(self.RefreshToken) < 124:
             Domoticz.Log("Refresh too short")
             WriteDebug("Refresh too short")
             self.RefreshToken = ""
 #        else:
 #            WriteFile("Refresh",self.Refresh)
 
-#        if len(self.SystemID) < 4:
-#            Domoticz.Log("System ID too short")
-#            WriteDebug("System ID too short")
-#            self.SystemID = CheckFile("SystemID")
-#        else:
-#            WriteFile("SystemID",self.SystemID)
+#        if 'HomeConnect' not in Images:
+#            Domoticz.Image('HomeConnect.zip').Create()
 
-#        if 'NIBEUplink' not in Images:
-#            Domoticz.Image('NIBEUplink.zip').Create()
-
-#        self.ImageID = Images["NIBEUplink"].ID
+#        self.ImageID = Images["HomeConnect"].ID
 #        self.GetToken = Domoticz.Connection(Name="Get Token", Transport="TCP/IP", Protocol="HTTPS", Address="api.home-connect.com", Port="443")
 #        self.GetToken.Connect()
 #        self.GetData = Domoticz.Connection(Name="Get Data", Transport="TCP/IP", Protocol="HTTPS", Address="api.home-connect.com", Port="443")
