@@ -15,7 +15,7 @@
         <ul style="list-style-type:square">
             <li>xxxxxxxxxxxxxxxxx</li>
         </ul>
-        <h3>How to get your Cliend ID, Client Secret and  Redirect URI?</h3>
+        <h3>How to get your Cliend ID, Client Secret and Redirect URI?</h3>
         <h4>&<a href="https://github.com/flopp999/HomeConnect-Domoticz#identifier-secret-and-callback-url">https://github.com/flopp999/HomeConnect-Domoticz#identifier-secret-and-callback-url</a></h4>
         <h3>How to get your Authorization Code?</h3>
         <h4>&<a href="https://github.com/flopp999/HomeConnect-Domoticz#access-code">https://github.com/flopp999/HomeConnect-Domoticz#access-code</a></h4>
@@ -112,8 +112,8 @@ class BasePlugin:
 #            WriteFile("Secret",self.Secret)
 
         if len(self.RefreshToken) < 124:
-            Domoticz.Log("Refresh too short")
-            WriteDebug("Refresh too short")
+            Domoticz.Log("Refresh Token too short")
+            WriteDebug("Refresh Token too short")
             self.RefreshToken = ""
 #        else:
 #            WriteFile("Refresh",self.Refresh)
@@ -171,22 +171,11 @@ class BasePlugin:
 
         self.Count += 1
         if self.Count == 6 and _plugin.GetData == True:  # check every minute
-# and _plugin.Status == 200:
             a = GetAppliances(_plugin.AccessToken)
             self.Count = 0
             GetOperationState(_plugin.AccessToken, _plugin.DeviceshaId, _plugin.DevicesName)
         if HourNow == 0 and MinuteNow == 0 and self.GetData is False:
             _plugin.GetData = True
-#            if not _plugin.GetDataCurrent.Connected() and not _plugin.GetDataCurrent.Connecting():
-#                WriteDebug("onHeartbeatGetDataCurrent")
-#                _plugin.GetDataCurrent.Connect()
-#        Domoticz.Log(str(self.refreshtoken))
-
-#        GetData =
-#        if self.Status == 200:
-#            NewToken = getnewtoken(_plugin.refreshtoken,_plugin.Secret)
-#        Domoticz.Log(str(getappliance(self.Token)))
-
 
 global _plugin
 _plugin = BasePlugin()
@@ -218,7 +207,6 @@ def GetAppliances(Token):
     _plugin.Status = int(Appliances.status_code)
     Appliances = Appliances.json()
     if _plugin.Status != 200:
-        _plugin.Status = Appliances["error"]["key"]
         CheckStatus(_plugin.Status, Appliances)
     else:
         for each in Appliances["data"]["homeappliances"]:
@@ -236,8 +224,6 @@ def GetAppliances(Token):
         _plugin.DeviceshaId.append(haId)
 
 
-#    return Token
-
 def GetTokens(ClientID, ClientSecret, Code, URL):
 
     data={"grant_type":"authorization_code","client_id":ClientID,"client_secret":ClientSecret,"code":Code,"redirect_uri":URL}
@@ -253,7 +239,6 @@ def GetOperationState(Token, haIds, Names):
     Domoticz.Log(str(haIds))
     Domoticz.Log(str(Names))
 
-#    data={"grant_type":"authorization_code","client_id":ClientID,"client_secret":ClientSecret,"code":Code,"redirect_uri":URL}
     headers = { "Authorization": "Bearer "+Token }
     for Name, haId in zip(Names, haIds):
         OperationState=requests.get("https://api.home-connect.com/api/homeappliances/"+haId+"/status/BSH.Common.Status.OperationState", headers=headers)
@@ -265,15 +250,6 @@ def GetOperationState(Token, haIds, Names):
         OperationState = OperationState[-1]
         UpdateDevice(2, 0, OperationState, Name, 0, 0, 0, 0, 0)
         Domoticz.Log(str(OperationState))
-
-
-
-#####           curl -X GET "https://simulator.home-connect.com/api/homeappliances/010090386487001856/status/OperationState" -H "accept: application/vnd.bsh.sdk.v1+json" -H "Accept-Language: en-GB"
-
-#    Domoticz.Log("Message="+str(Token.json()))
-#    Domoticz.Log("Status="+str(Token.status_code))
-
-#    return Tokens
 
 def GetNewAccessCode(RefreshToken, ClientSecret):
 
@@ -307,11 +283,9 @@ def CreateFile():
             json.dump(data, outfile, indent=4)
 
 def CheckStatus(Status, Data):
-
-    if Status != "200":
-        Domoticz.Error("Status = "+str(Status))
-        Domoticz.Error("Error: "+str(Data["error"]["description"]))
-        _plugin.GetData = False
+    Domoticz.Error("Status Code = "+str(Status))
+    Domoticz.Error("Error: "+str(Data["error"]["key"])+", "+str(Data["error"]["description"]))
+    _plugin.GetData = False
 
 def CheckFile(Parameter):
     if os.path.isfile(dir+'/HomeConnect.ini'):
