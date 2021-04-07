@@ -3,7 +3,7 @@
 # Author: flopp999
 #
 """
-<plugin key="HomeConnect" name="Home Connect 0.1" author="flopp999" version="0.1" wikilink="https://github.com/flopp999/" externallink="https://www.ink.com/">
+<plugin key="HomeConnect" name="Home Connect 0.1" author="flopp999" version="0.1" wikilink="https://github.com/flopp999/HomeConnect-Domoticz" externallink="https://github.com/flopp999/HomeConnect-Domoticz">
     <description>
         <h2>HomeConnect is reading data from https://api.home-connect.com</h2><br/>
         <h2>Support me with a coffee &<a href="https://www.buymeacoffee.com/flopp999">https://www.buymeacoffee.com/flopp999</a></h2><br/>
@@ -22,11 +22,12 @@
         <h3>Configuration</h3>
     </description>
     <params>
-        <param field="Username" label="Home Connect Client ID" width="320px" required="true" default="Client ID"/>
+        <param field="Mode5" label="Home Connect Client ID" width="320px" required="true" default="Client ID"/>
         <param field="Mode2" label="Home Connect Client Secret" width="350px" required="true" default="Client Secret"/>
-        <param field="Address" label="Home Connect Redirect URI" width="950px" required="true" default="Redirect URI"/>
+        <param field="Address" label="Home Connect Redirect URI" width="650px" required="true" default="Redirect URI"/>
         <param field="Mode1" label="Home Connect Authorization Code" width="350px" required="true" default="Authorization Code"/>
         <param field="Mode3" label="Home Connect Refresh Token" width="350px" default="Copy Refresh Token from Log to here" required="true"/>
+        <param field="Mode4" label="BETA Access Token" width="350px" default="only during BETA test" required="false"/>
         <param field="Mode6" label="Debug to file (HomeConnect.log)" width="70px">
             <options>
                 <option label="Yes" value="Yes" />
@@ -66,14 +67,14 @@ class BasePlugin:
     enabled = False
 
     def __init__(self):
-        self.AccessToken = ""
-        self.loop = 0
-        self.Count = 5
         return
 
     def onStart(self):
         WriteDebug("onStart")
-        self.ClientID = Parameters["Username"]
+        self.loop = 0
+        self.Count = 5
+        self.AccessToken = Parameters["Mode4"]
+        self.ClientID = Parameters["Mode5"]
         self.RedirectURI = Parameters["Address"]
         self.AuthorizationCode = Parameters["Mode1"]
         self.ClientSecret = Parameters["Mode2"]
@@ -122,6 +123,9 @@ class BasePlugin:
             Domoticz.Image('HomeConnect.zip').Create()
 
         self.ImageID = Images["HomeConnect"].ID
+
+
+        GetAppliances(_plugin.AccessToken)
 #        self.GetToken = Domoticz.Connection(Name="Get Token", Transport="TCP/IP", Protocol="HTTPS", Address="api.home-connect.com", Port="443")
 #        self.GetToken.Connect()
 #        self.GetData = Domoticz.Connection(Name="Get Data", Transport="TCP/IP", Protocol="HTTPS", Address="api.home-connect.com", Port="443")
@@ -171,7 +175,7 @@ class BasePlugin:
 
         self.Count += 1
         if self.Count == 6 and _plugin.GetData == True:  # check every minute
-            a = GetAppliances(_plugin.AccessToken)
+#            a = GetAppliances(_plugin.AccessToken)
             self.Count = 0
             GetOperationState(_plugin.AccessToken, _plugin.DeviceshaId, _plugin.DevicesName)
         if HourNow == 0 and MinuteNow == 0 and self.GetData is False:
@@ -192,9 +196,9 @@ def UpdateDevice(Unit, nValue, sValue, Name, Brand, VIB, Type, eNumber, haId):
         if sValue == "-32768":
             return
         elif Unit == 1:
-            Domoticz.Device(Name=Name+" Connected", Unit=Unit, TypeName="Custom", Used=1, Image=(_plugin.ImageID), Description="Brand="+str(Brand)+"\ntype="+str(VIB)+"\neNumber="+str(eNumber)+"\nhaId="+str(haId)).Create()
+            Domoticz.Device(Name=Name+" Connected", Unit=Unit, TypeName="Text", Used=1, Image=(_plugin.ImageID), Description="Brand="+str(Brand)+"\ntype="+str(VIB)+"\neNumber="+str(eNumber)+"\nhaId="+str(haId)).Create()
         elif Unit == 2:
-            Domoticz.Device(Name=Name+" State", Unit=Unit, TypeName="Custom", Used=1, Image=(_plugin.ImageID)).Create()
+            Domoticz.Device(Name=Name+" State", Unit=Unit, TypeName="Text", Used=1, Image=(_plugin.ImageID)).Create()
 
 
 def GetAppliances(Token):
@@ -248,7 +252,7 @@ def GetOperationState(Token, haIds, Names):
         OperationState = OperationState["data"]["value"]
         OperationState = OperationState.split(".")
         OperationState = OperationState[-1]
-        UpdateDevice(2, 0, OperationState, Name, 0, 0, 0, 0, 0)
+        UpdateDevice(2, 0, str(OperationState), Name, 0, 0, 0, 0, 0)
         Domoticz.Log(str(OperationState))
 
 def GetNewAccessCode(RefreshToken, ClientSecret):
