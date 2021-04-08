@@ -14,8 +14,8 @@ Run "pip3 install -r requirements.txt" to install all packages that this plugin 
 You need to have some information to be able to use this plugin: 
 
 First create an account here https://developer.home-connect.com/  
-Then Application -> Register Application
-![](./homeconnect.jpg "Photo")
+Then Application -> Register Application  
+![](./homeconnect.jpg "Photo")  
 Explain for the photo:  
 Application ID can be anything  
 OAuth Flow shall be Authorization Code Grant Flow  
