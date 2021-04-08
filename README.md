@@ -26,11 +26,11 @@ Login to [Home Connect](https://developer.home-connect.com/applications/)
 Register new application https://developer.home-connect.com/applications/add  
 *Application ID can be anything, OAuth Flow shall be "Authorization Code Grant Flow", Home Connect User... can be empty, Redirect URi can be any address, as long as it exists*  
 Copy Client ID, Client Secret and Redirect URi, paste to HomeConnect hardware in Domoticz  
+
+# Authorization Code
 Create an Authorization code by replace {client_id} and {redirect_uri} with details you got during registration of new application
 https://api.home-connect.com/security/oauth/authorize?response_type=code&client_id={client_id}&scope=IdentifyAppliance%20Monitor&redirect_uri={redirect_uri}
 
-
-# Authorization Code
 # Access Token and Refresh Token
 You need to create an Access code before first use  
 Click on the link below, you will get an error, that is OK  
@@ -41,6 +41,3 @@ When this is done the address bar will look something like below
 "h<span>ttps://a<span>pi.nib<span>euplink.com/?code=ndfhj3u38ufhswhnerjqa5zEyN-RmBgkTCc&state=x"  
 Copy everything after "...code=" and before "&state...", the code above is just an example, normally the code is ~380 characters
 Above example have access code "ndfhj3u38ufhswhnerjqa5zEyN-RmBgkTCc"
-
-
-Support me with a coffee https://www.buymeacoffee.com/flopp999 or use my Tibber link https://tibber.com/se/invite/8af85f51
