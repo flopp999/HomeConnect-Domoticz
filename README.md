@@ -28,13 +28,10 @@ Redirect URi can be any address, as long as it exists
 # Client ID, Client Secret and Redirect URi  
 Login to [Home Connect](https://developer.home-connect.com/applications/)  
 Register new application https://developer.home-connect.com/applications/add  
-*Application ID can be anything  
-*OAuth Flow shall be "Authorization Code Grant Flow"  
-*Home Connect User... can be empty  
-'Redirect URi can be any address, as long as it exists  
+*Application ID can be anything, OAuth Flow shall be "Authorization Code Grant Flow", Home Connect User... can be empty, Redirect URi can be any address, as long as it exists*  
+Copy Client ID, Client Secret and Redirect URi, paste to HomeConnect hardware in Domoticz  
 
-For Callback URL use "h<span>ttps://a<span>pi.nib<span>euplink.com/"  
-Copy Identifier, Secret and Callback URL, paste to NIBEUplink hardware in Domoticz  
+https://api.home-connect.com/security/oauth/authorize?response_type=code&client_id={client_id}&scope={scope}&redirect_uri={redirect_uri}
 
 # System ID
 Login to [NIBE Uplink](https://nibeuplink.com/)  
