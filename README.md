@@ -19,7 +19,7 @@ You need to have some information to be able to use this plugin:
 [Redirect RUi](https://github.com/flopp999/HomeConnect-Domoticz/blob/main/README.md#Identifier,-Secret-and-Callback-URL)  
 [Authorization Code](https://github.com/flopp999/HomeConnect-Domoticz/blob/main/README.md#System-ID)  
 [Refresh Token](https://github.com/flopp999/HomeConnect-Domoticz/blob/main/README.md#Charge-from-your-electricity-company)  
-[Access code](https://github.com/flopp999/HomeConnect-Domoticz/blob/main/README.md#Access-code)
+[Access Token](https://github.com/flopp999/HomeConnect-Domoticz/blob/main/README.md#Access-code)
 
 # Client ID, Client Secret and Redirect URi  
 Login to [Home Connect](https://developer.home-connect.com/applications/)  
@@ -29,7 +29,9 @@ Copy Client ID, Client Secret and Redirect URi, paste to HomeConnect hardware in
 Create an Authorization code by replace {client_id} and {redirect_uri} with details you got during registration of new application
 https://api.home-connect.com/security/oauth/authorize?response_type=code&client_id={client_id}&scope=IdentifyAppliance%20Monitor&redirect_uri={redirect_uri}
 
-# Access code
+
+# Authorization Code
+# Access Token and Refresh Token
 You need to create an Access code before first use  
 Click on the link below, you will get an error, that is OK  
 https://api.nibeuplink.com/oauth/authorize?client_id=yyyyyy&scope=READSYSTEM&state=x&redirect_uri=https://api.nibeuplink.com/&response_type=code  
