@@ -13,9 +13,14 @@ Run "pip3 install -r requirements.txt" to install all packages that this plugin 
 ---
 You need to have some information to be able to use this plugin: 
 
-First create and account here https://developer.home-connect.com/  
+First create an account here https://developer.home-connect.com/  
 Then Application -> Register Application
 ![](./homeconnect.jpg "Photo")
+Explain for the photo:  
+Application ID can be anything  
+OAuth Flow shall be Authorization Code Grant Flow  
+Home Connect User.... can be empty  
+Redirect URi can be any address as long as it exists  
 
 [Client ID](https://github.com/flopp999/HomeConnect-Domoticz/blob/main/README.md#Identifier,-Secret-and-URL)  
 [Client Secret](https://github.com/flopp999/HomeConnect-Domoticz/blob/main/README.md#Identifier,-Secret-and-URL)  
