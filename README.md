@@ -13,14 +13,10 @@ Run "pip3 install -r requirements.txt" to install all packages that this plugin 
 ---
 You need to have some information to be able to use this plugin: 
 
-First create an account here https://developer.home-connect.com/  
-Then Application -> Register Application  
-![](./homeconnect.jpg "Photo")  
-Explain for the photo:  
 Application ID can be anything  
-OAuth Flow shall be Authorization Code Grant Flow  
-Home Connect User.... can be empty  
-Redirect URi can be any address as long as it exists  
+OAuth Flow shall be "Authorization Code Grant Flow"  
+Home Connect User... can be empty  
+Redirect URi can be any address, as long as it exists  
 
 [Client ID](https://github.com/flopp999/HomeConnect-Domoticz/blob/main/README.md#Identifier,-Secret-and-URL)  
 [Client Secret](https://github.com/flopp999/HomeConnect-Domoticz/blob/main/README.md#Identifier,-Secret-and-URL)  
@@ -29,9 +25,14 @@ Redirect URi can be any address as long as it exists
 [Refresh Token](https://github.com/flopp999/HomeConnect-Domoticz/blob/main/README.md#Charge-from-your-electricity-company)  
 [Access code](https://github.com/flopp999/HomeConnect-Domoticz/blob/main/README.md#Access-code)
 
-# Client ID, Client Secret and Redirect URi
-Login to [NIBE Uplink API](https://api.nibeuplink.com/)  
-Create an application under My Applications  
+# Client ID, Client Secret and Redirect URi  
+Login to [Home Connect](https://developer.home-connect.com/applications/)  
+Register new application https://developer.home-connect.com/applications/add  
+*Application ID can be anything  
+*OAuth Flow shall be "Authorization Code Grant Flow"  
+*Home Connect User... can be empty  
+'Redirect URi can be any address, as long as it exists  
+
 For Callback URL use "h<span>ttps://a<span>pi.nib<span>euplink.com/"  
 Copy Identifier, Secret and Callback URL, paste to NIBEUplink hardware in Domoticz  
 
