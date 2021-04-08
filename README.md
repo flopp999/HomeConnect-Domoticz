@@ -30,17 +30,8 @@ Login to [Home Connect](https://developer.home-connect.com/applications/)
 Register new application https://developer.home-connect.com/applications/add  
 *Application ID can be anything, OAuth Flow shall be "Authorization Code Grant Flow", Home Connect User... can be empty, Redirect URi can be any address, as long as it exists*  
 Copy Client ID, Client Secret and Redirect URi, paste to HomeConnect hardware in Domoticz  
-
-https://api.home-connect.com/security/oauth/authorize?response_type=code&client_id={client_id}&scope={scope}&redirect_uri={redirect_uri}
-
-# System ID
-Login to [NIBE Uplink](https://nibeuplink.com/)  
-When logged in, look at the address bar, "h<span>ttps://w<i></i>ww.<span>nibeuplink.com/System/xxxxxx/Status/Overview", xxxxxx is your System ID  
-Copy your System ID and paste to NIBEUplink hardware in Domoticz  
-
-# Charge from your electricity company
-You need to add the total extra charge your electricity company have, without taxes  
-e.g. Tibber have SEK 1.55 at the moment  
+Create an Authorization code by replace {client_id} and {redirect_uri} with details you got during registration of new application
+https://api.home-connect.com/security/oauth/authorize?response_type=code&client_id={client_id}&scope=IdentifyAppliance%20Monitor&redirect_uri={redirect_uri}
 
 # Access code
 You need to create an Access code before first use  
