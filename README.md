@@ -3,11 +3,11 @@ Please use my Tibber invite code, then we both get SEK 500, to use in Tibber sho
 ---
 Create a folder with name "HomeConnect" in "domoticz/plugins"  
 Put plugin.py, requirements.txt in that folder
-
+Run "pip3 install -r requirements.txt" to install all packages that this plugin needs
 or
 
 Run in domoticz/plugins "sudo git clone h<span>ttps://gith<span>ub.com/flopp999/HomeConnect-Domoticz HomeConnect"  
-Run "cd HomeConnect"
+Run "cd HomeConnect"  
 Run "pip3 install -r requirements.txt" to install all packages that this plugin needs
 
 ---
