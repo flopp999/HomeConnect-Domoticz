@@ -14,12 +14,7 @@ Run "pip3 install -r requirements.txt" to install all packages that this plugin 
 ---
 You need to have some information to be able to use this plugin: 
 
-Application ID can be anything  
-OAuth Flow shall be "Authorization Code Grant Flow"  
-Home Connect User... can be empty  
-Redirect URi can be any address, as long as it exists  
-
-[Client ID](https://github.com/flopp999/HomeConnect-Domoticz/blob/main/README.md#Identifier,-Secret-and-URL)  
+[Client ID](https://github.com/flopp999/HomeConnect-Domoticz/blob/main/README.md#Client-ID,-Client-Secret-and-Redirect-URi)  
 [Client Secret](https://github.com/flopp999/HomeConnect-Domoticz/blob/main/README.md#Identifier,-Secret-and-URL)  
 [Redirect RUi](https://github.com/flopp999/HomeConnect-Domoticz/blob/main/README.md#Identifier,-Secret-and-Callback-URL)  
 [Authorization Code](https://github.com/flopp999/HomeConnect-Domoticz/blob/main/README.md#System-ID)  
