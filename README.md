@@ -28,7 +28,7 @@ Register new application https://developer.home-connect.com/applications/add
 Copy Client ID, Client Secret and Redirect URi, paste to HomeConnect hardware in Domoticz  
 
 # Authorization Code
-Create an Authorization code by replace {client_id} and {redirect_uri}, in the link below, with details you got during registration of new application
+Create an Authorization code by replace {client_id} and {redirect_uri}, in the link below, with details you got during registration of new application  
 https://api.home-connect.com/security/oauth/authorize?response_type=code&client_id={client_id}&scope=IdentifyAppliance%20Monitor&redirect_uri={redirect_uri}
 
 # Access Token and Refresh Token
