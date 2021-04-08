@@ -2,7 +2,7 @@ Support me with a coffee https://www.buymeacoffee.com/flopp999 or use my Tibber 
 
 ---
 Create a folder with name "HomeConnect" in "domoticz/plugins"  
-Put plugin.py, requirements.txt in that folder
+Put plugin.py, requirements.txt in that folder  
 Run "pip3 install -r requirements.txt" to install all packages that this plugin needs  
 
 or
