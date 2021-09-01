@@ -30,14 +30,3 @@ Copy Client ID, Client Secret and Redirect URi, paste to HomeConnect hardware in
 # Authorization Code
 Create an Authorization code by replace {client_id} and {redirect_uri}, in the link below, with details you got during registration of new application  
 https://api.home-connect.com/security/oauth/authorize?response_type=code&client_id={client_id}&scope=IdentifyAppliance%20Monitor&redirect_uri={redirect_uri}
-
-# Access Token and Refresh Token
-You need to create an Access code before first use  
-Click on the link below, you will get an error, that is OK  
-https://api.nibeuplink.com/oauth/authorize?client_id=yyyyyy&scope=READSYSTEM&state=x&redirect_uri=https://api.nibeuplink.com/&response_type=code  
-Once you clicked it, in the address bar change yyyyyy to your Identifier, NOT YOUR SYSTEM ID!!!  
-Then it will ask you to login and accept.  
-When this is done the address bar will look something like below  
-"h<span>ttps://a<span>pi.nib<span>euplink.com/?code=ndfhj3u38ufhswhnerjqa5zEyN-RmBgkTCc&state=x"  
-Copy everything after "...code=" and before "&state...", the code above is just an example, normally the code is ~380 characters
-Above example have access code "ndfhj3u38ufhswhnerjqa5zEyN-RmBgkTCc"
