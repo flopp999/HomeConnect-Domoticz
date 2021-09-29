@@ -3,10 +3,11 @@
 # Author: flopp999
 #
 """
-<plugin key="HomeConnect" name="Home Connect 0.12" author="flopp999" version="0.12" wikilink="https://github.com/flopp999/HomeConnect-Domoticz" externallink="https://github.com/flopp999/HomeConnect-Domoticz">
+<plugin key="HomeConnect" name="Home Connect 0.14" author="flopp999" version="0.14" wikilink="https://github.com/flopp999/HomeConnect-Domoticz" externallink="https://github.com/flopp999/HomeConnect-Domoticz">
     <description>
         <h2>HomeConnect is reading data from https://api.home-connect.com</h2><br/>
         <h2>Support me with a coffee &<a href="https://www.buymeacoffee.com/flopp999">https://www.buymeacoffee.com/flopp999</a></h2><br/>
+        <h2>or use my Tibber link &<a href="https://tibber.com/se/invite/8af85f51">https://tibber.com/se/invite/8af85f51</a></h2><br/>
         <h3>Features</h3>
         <ul style="list-style-type:square">
             <li>..</li>
@@ -22,10 +23,10 @@
         <h3>Configuration</h3>
     </description>
     <params>
-        <param field="Mode5" label="Home Connect Client ID" width="320px" required="true" default="Client ID"/>
-        <param field="Mode2" label="Home Connect Client Secret" width="350px" required="true" default="Client Secret"/>
-        <param field="Address" label="Home Connect Redirect URI" width="650px" required="true" default="Redirect URI"/>
-        <param field="Mode1" label="Home Connect Authorization Code" width="350px" required="true" default="Authorization Code"/>
+        <param field="Mode5" label="Client ID" width="500px" required="true" default="Client ID"/>
+        <param field="Mode2" label="Client Secret" width="500px" required="true" default="Client Secret"/>
+        <param field="Address" label="Redirect URI" width="650px" required="true" default="Redirect URI"/>
+        <param field="Mode1" label="Authorization Code" width="350px" required="true" default="Authorization Code"/>
         <param field="Mode6" label="Debug to file (HomeConnect.log)" width="70px">
             <options>
                 <option label="Yes" value="Yes" />
@@ -105,19 +106,24 @@ class BasePlugin:
             Domoticz.Log("Authorization Code too short")
             WriteDebug("Authorization Code too short")
 
+        self.RefreshToken = CheckFile("RefreshToken")
+
+
+#        Domoticz.Log(self.RefreshToken)
+
 #        if self.RefreshToken == False:
 #            Domoticz.Log("RefreshToken too short")
 #            WriteDebug("RefreshToken too short")
+#            self.GetAccessToken.Connect()
 #        else:
 #            self.RefreshAccessToken.Connect()
 
-        if 'HomeConnect' not in Images:
-            Domoticz.Image('HomeConnect.zip').Create()
+        if os.path.isfile(dir+'/HomeConnect.zip'):
+            if 'HomeConnect' not in Images:
+                Domoticz.Image('HomeConnect.zip').Create()
+            self.ImageID = Images["HomeConnect"].ID
 
-        self.ImageID = Images["HomeConnect"].ID
 
-
-        self.GetAccessToken.Connect()
 
 
 #        self.KeepAlive.Connect()
@@ -169,24 +175,25 @@ class BasePlugin:
     def onConnect(self, Connection, Status, Description):
 
         if Connection.Name == ("Get AccessToken"):
+            Domoticz.Log("Get AccessToken")
             data = "grant_type=authorization_code"
             data += "&client_id="+self.ClientID
             data += "&client_secret="+self.ClientSecret
             data += "&redirect_uri="+self.RedirectURI
             data += "&code="+self.AuthorizationCode
-            Domoticz.Log(str(data))
+#            Domoticz.Log(str(data))
             headers = { 'Host': 'api.home-connect.com', 'Content-Type': 'application/x-www-form-urlencoded' }
             Connection.Send({'Verb':'POST', 'URL': '/security/oauth/token', 'Headers': headers, 'Data': data})
-            Domoticz.Log("Get AccessToken Done")
 
         if Connection.Name == ("Refresh AccessToken"):
+            Domoticz.Log(str(self.RefreshToken))
+            Domoticz.Log("refresh start")
             data = "grant_type=refresh_token"
             data += "&refresh_token="+self.RefreshToken
             data += "&client_secret="+self.ClientSecret
 #            Domoticz.Log(str(data))
             headers = { 'Host': 'api.home-connect.com', 'Content-Type': 'application/x-www-form-urlencoded' }
             Connection.Send({'Verb':'POST', 'URL': '/security/oauth/token', 'Headers': headers, 'Data': data})
-            Domoticz.Log("Refresh AccessToken Done")
 
         if Connection.Name == ("Get OperationState"):
             headers = { 'Host': 'api.home-connect.com', 'Authorization': 'Bearer '+self.AccessToken }
@@ -196,7 +203,7 @@ class BasePlugin:
         if Connection.Name == ("KeepAlive"):
             Domoticz.Log("KeepAlive")
             headers = { 'Host': 'api.home-connect.com', 'Accept': 'text/event-stream', 'Authorization': 'Bearer '+self.AccessToken }
-            Domoticz.Log(str(headers))
+#            Domoticz.Log(str(headers))
 
             Connection.Send({'Verb':'GET', 'URL': '/api/homeappliances/56/events', 'Headers': headers})
             Domoticz.Log("KeepAlive Done")
@@ -210,24 +217,42 @@ class BasePlugin:
 
         if Status == 200:
             if Connection.Name == ("Get AccessToken"):
-                Domoticz.Log(str(Data))
+                Domoticz.Log("Get AccessToken Onmess")
+                Domoticz.Log("AccessToken old")
+
+                Domoticz.Log(str(self.AccessToken))
+
+                self.AccessToken = Data["access_token"]
+                Domoticz.Log("AccessToken new")
+                Domoticz.Log(str(self.AccessToken))
+
+                self.RefreshToken = Data["refresh_token"]
+                Domoticz.Log(str(self.RefreshToken))
+
+                WriteFile("RefreshToken",self.RefreshToken)
+                self.GetAccessToken.Disconnect()
+                Domoticz.Log("Get Refresh Done")
+
+            elif Connection.Name == ("Refresh AccessToken"):
+
+                self.AccessToken = Data["access_token"]
+                Domoticz.Log(str(self.AccessToken))
+
+                self.RefreshToken = Data["refresh_token"]
+                Domoticz.Log(str(self.RefreshToken))
+
+                WriteFile("RefreshToken",self.RefreshToken)
+                self.RefreshAccessToken.Disconnect()
+
+#                self.KeepAlive.Connect()
+
+
+            elif Connection.Name == ("Get OperationState"):
                 self.AccessToken = Data["access_token"]
                 self.RefreshToken = Data["refresh_token"]
 #                WriteFile("RefreshToken",self.RefreshToken)
 
-            if Connection.Name == ("Refresh AccessToken"):
-                self.AccessToken = Data["access_token"]
-                self.RefreshToken = Data["refresh_token"]
-#                WriteFile("RefreshToken",self.RefreshToken)
-                self.KeepAlive.Connect()
-
-
-            if Connection.Name == ("Get OperationState"):
-                self.AccessToken = Data["access_token"]
-                self.RefreshToken = Data["refresh_token"]
-#                WriteFile("RefreshToken",self.RefreshToken)
-
-            if Connection.Name == ("KeepAlive"):
+            elif Connection.Name == ("KeepAlive"):
                 Domoticz.Log(str(Data))
 
 #        elif Status == 400 and Data["error_description"] == "invalid authorization_code":
@@ -236,9 +261,22 @@ class BasePlugin:
 #            self.RefreshAccessToken.Connect()
 
         else:
+            if self.GetAccessToken.Connected():
+                self.GetAccessToken.Disconnect()
+            if self.RefreshAccessToken.Connected():
+                self.RefreshAccessToken.Disconnect()
+
             Domoticz.Error(str("Status "+str(Status)))
             Domoticz.Error(str(Data))
+            if Data["error_description"] == "invalid authorization_code":
+                Domoticz.Error("Please create new Authorization Code, click below link")
+                Domoticz.Error("https://api.home-connect.com/security/oauth/authorize?response_type=code&client_id="+self.ClientID+"&scope=IdentifyAppliance%20Monitor&redirect_uri="+self.RedirectURI)
+#                self.RefreshAccessToken.Connect()
 
+#            if _plugin.GetToken.Connected():
+#               _plugin.GetToken.Disconnect()
+#            if _plugin.GetData.Connected():
+#               _plugin.GetData.Disconnect()
 
     def onHeartbeat(self):
         Domoticz.Log("heart")
@@ -248,14 +286,19 @@ class BasePlugin:
 
         self.Count += 1
         if self.Count == 7 and _plugin.GetData == True:  # check every minute
-            Domoticz.Log("getd")
-            GetAppliances(_plugin.AccessToken)
+            self.RefreshAccessToken.Connect()
+
+#            Domoticz.Log("getd")
+#            self.GetAccessToken.Connect()
+#            GetAppliances(_plugin.AccessToken)
 
 
             self.Count = 0
-            GetOperationState(_plugin.AccessToken, _plugin.DevicehaId, _plugin.DeviceName)
-        if HourNow == 0 and MinuteNow == 0 and self.GetData is False:
-            _plugin.GetData = True
+#        if self.Count == 4:  # check every minute
+
+#            GetOperationState(_plugin.AccessToken, _plugin.DevicehaId, _plugin.DeviceName)
+#        if HourNow == 0 and MinuteNow == 0 and self.GetData is False:
+#            _plugin.GetData = True
 
 global _plugin
 _plugin = BasePlugin()
@@ -295,7 +338,7 @@ def GetAppliances(Token):
         CheckStatus(_plugin.Status, Appliances)
     else:
         for each in Appliances["data"]["homeappliances"]:
-            Domoticz.Log(str(each))
+#            Domoticz.Log(str(each))
             name = each["name"]
             brand = each["brand"]
             vib = each["vib"]
@@ -323,7 +366,7 @@ def GetTokens(ClientID, ClientSecret, Code, URL):
     return Tokens
 
 def GetOperationState(Token, haIds, Names):
-    Domoticz.Log(str(Token))
+#    Domoticz.Log(str(Token))
     #Domoticz.Log(str(haIds))
     #Domoticz.Log(str(Names))
 
@@ -379,6 +422,35 @@ def WriteDebug(text):
     if Parameters["Mode6"] == "Yes":
         timenow = (datetime.now())
         logger.info(str(timenow)+" "+text)
+
+def CreateFile():
+    if not os.path.isfile(dir+'/HomeConnect.ini'):
+        data = {}
+        data["Config"] = []
+        data["Config"].append({
+            "Refresh": "",
+            })
+        with open(dir+'/HomeConnect.ini', 'w') as outfile:
+            json.dump(data, outfile, indent=4)
+
+def CheckFile(Parameter):
+    if os.path.isfile(dir+'/HomeConnect.ini'):
+        with open(dir+'/HomeConnect.ini') as jsonfile:
+            data = json.load(jsonfile)
+            data = data["Config"][0][Parameter]
+            if data == "":
+                _plugin.AllSettings = False
+            else:
+                return data
+
+def WriteFile(Parameter,text):
+    CreateFile()
+    with open(dir+'/HomeConnect.ini') as jsonfile:
+        data = json.load(jsonfile)
+    data["Config"][0][Parameter] = text
+    with open(dir+'/HomeConnect.ini', 'w') as outfile:
+        json.dump(data, outfile, indent=4)
+
 
 def onConnect(Connection, Status, Description):
     global _plugin
